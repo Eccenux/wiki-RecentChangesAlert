@@ -39,7 +39,7 @@ function recentChangesAlertFactory() {
 
     /** Inicjuje obserwację zmian na stronie. */
     init() {
-      const target = document.querySelector(".mw-changeslist");
+      const target = document.querySelector(".mw-rcfilters-ui-changesListWrapperWidget");
       if (!target) {
         console.warn("Nie znaleziono kontenera z listą zmian.");
         return;
