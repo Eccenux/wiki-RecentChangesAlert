@@ -27,13 +27,17 @@ if (location.search.includes('Specjalna%3AOstatnie_zmiany')) {
 function recentChangesAlertFactory() {
 
   class RecentChangesAlert {
-    /** Ścieżka do dźwięku powiadomienia. */
-    soundUrl = "https://actions.google.com/sounds/v1/alarms/beep_short.ogg";
+    /** Dźwięk powiadomienia (ustaw via setSounds). */
+    shortSoundUrl = "https://upload.wikimedia.org/wikipedia/commons/6/61/Beep_400ms.ogg";
+    // OR: https://commons.wikimedia.org/wiki/File:Emergency_Alert_System_Attention_Signal_20s.ogg
+    // OR: https://commons.wikimedia.org/wiki/Category:Emergency_Alert_System
+    /** Dźwięku powiadomienia po dłuższej przerwie między powiadomieniami (ustaw via setSounds). */
+    longSoundUrl = "https://upload.wikimedia.org/wikipedia/commons/1/14/Same.ogg";
+
+    /** Po ilu minutach nieaktywności odtworzyć długi dźwięk (teoretycznie może być ułamkiem). */
+    longSoundMinutes = 10;
 
     logTag = '[rcAlert]';
-
-    /** Odtwarzacz audio. */
-    sound = null;
 
     /** Ostatni znany timestamp zmian. */
     lastTimestamp = -1;
@@ -41,9 +45,32 @@ function recentChangesAlertFactory() {
     /** Obiekt MutationObserver. */
     observer = null;
 
-    constructor(soundUrl) {
-      if (soundUrl) this.soundUrl = soundUrl;
-      this.sound = new Audio(this.soundUrl);
+    constructor() {
+      /** Odtwarzacze audio. */
+      this.sounds = {
+        short: null,
+        long: null,
+      }
+      this.prepSounds();
+    }
+
+    /** Ustaw własne dźwięki powiadomień. */
+    setSounds(options) {
+      if (typeof options === 'object') {
+        if (options.shortSoundUrl) this.shortSoundUrl = options.shortSoundUrl;
+        if (options.longSoundUrl) this.longSoundUrl = options.longSoundUrl;
+        this.prepSounds(true);
+      }
+    }
+
+    /** Przygotowuje odtwarzacze dźwięków powiadomień. */
+    prepSounds(force = false) {
+      if (force || !this.sounds.short) {
+        this.sounds.short = new Audio(this.shortSoundUrl);
+      }
+      if (force || !this.sounds.longSoundUrl) {
+        this.sounds.long = new Audio(this.longSoundUrl);
+      }
     }
 
     /** Inicjuje obsługę start/stop na przycisku Live Update ("Odświeżaj na bieżąco"). */
@@ -73,11 +100,15 @@ function recentChangesAlertFactory() {
       }
 
       this.lastTimestamp = this.getLatestTimestamp();
+      this.lastDateTime = new Date();
 
       this.observer = new MutationObserver(() => {
         const current = this.getLatestTimestamp();
         if (current > this.lastTimestamp) {
-          this.playSound();
+          const now = new Date();
+          const diffMinutes = (now - this.lastDateTime) / 60000;
+          this.playSound(diffMinutes >= this.longSoundMinutes ? this.sounds.long : this.sounds.short);
+          this.lastDateTime = now;
         }
         this.lastTimestamp = current;
       });
@@ -96,14 +127,14 @@ function recentChangesAlertFactory() {
     }
 
     /** Odtwarza dźwięk powiadomienia. */
-    playSound() {
-      this.sound.play().catch(() => {});
+    playSound(sound) {
+      sound.play().catch(() => {});
     }
 
     /** Testuje odtwarzanie dźwięku. */
-    testSound() {
-      const test = new Audio(this.soundUrl);
-      test.play().catch(() => {});
+    testSound(long = false) {
+      this.prepSounds();
+      this.playSound(long ? this.sounds.long : this.sounds.short);
     }
 
     /** Zatrzymuje obserwację zmian. */
