@@ -7,7 +7,7 @@
 // TODO: spr. czy bieżąca strona to Specjalna%3AOstatnie_zmiany wg mw.config
 // TODO: mw.hook? 
 if (location.search.includes('Specjalna%3AOstatnie_zmiany')) {
-  var rcAlert = recentChangesAlertFactory();
+	var rcAlert = recentChangesAlertFactory();
 	// spróbuj od razu
 	if (!rcAlert.initButtonHandler()) {
 		console.log(rcAlert.logTag, 'not yet');
@@ -26,125 +26,125 @@ if (location.search.includes('Specjalna%3AOstatnie_zmiany')) {
 
 function recentChangesAlertFactory() {
 
-  class RecentChangesAlert {
-    /** Dźwięk powiadomienia (ustaw via setSounds). */
-    shortSoundUrl = "https://upload.wikimedia.org/wikipedia/commons/6/61/Beep_400ms.ogg";
-    // OR: https://commons.wikimedia.org/wiki/File:Emergency_Alert_System_Attention_Signal_20s.ogg
-    // OR: https://commons.wikimedia.org/wiki/Category:Emergency_Alert_System
-    /** Dźwięku powiadomienia po dłuższej przerwie między powiadomieniami (ustaw via setSounds). */
-    longSoundUrl = "https://upload.wikimedia.org/wikipedia/commons/1/14/Same.ogg";
+	class RecentChangesAlert {
+		/** Dźwięk powiadomienia (ustaw via setSounds). */
+		shortSoundUrl = "https://upload.wikimedia.org/wikipedia/commons/6/61/Beep_400ms.ogg";
+		// OR: https://commons.wikimedia.org/wiki/File:Emergency_Alert_System_Attention_Signal_20s.ogg
+		// OR: https://commons.wikimedia.org/wiki/Category:Emergency_Alert_System
+		/** Dźwięku powiadomienia po dłuższej przerwie między powiadomieniami (ustaw via setSounds). */
+		longSoundUrl = "https://upload.wikimedia.org/wikipedia/commons/1/14/Same.ogg";
 
-    /** Po ilu minutach nieaktywności odtworzyć długi dźwięk (teoretycznie może być ułamkiem). */
-    longSoundMinutes = 10;
+		/** Po ilu minutach nieaktywności odtworzyć długi dźwięk (teoretycznie może być ułamkiem). */
+		longSoundMinutes = 10;
 
-    logTag = '[rcAlert]';
+		logTag = '[rcAlert]';
 
-    /** Ostatni znany timestamp zmian. */
-    lastTimestamp = -1;
+		/** Ostatni znany timestamp zmian. */
+		lastTimestamp = -1;
 
-    /** Obiekt MutationObserver. */
-    observer = null;
+		/** Obiekt MutationObserver. */
+		observer = null;
 
-    constructor() {
-      /** Odtwarzacze audio. */
-      this.sounds = {
-        short: null,
-        long: null,
-      }
-      this.prepSounds();
-    }
+		constructor() {
+			/** Odtwarzacze audio. */
+			this.sounds = {
+				short: null,
+				long: null,
+			}
+			this.prepSounds();
+		}
 
-    /** Ustaw własne dźwięki powiadomień. */
-    setSounds(options) {
-      if (typeof options === 'object') {
-        if (options.shortSoundUrl) this.shortSoundUrl = options.shortSoundUrl;
-        if (options.longSoundUrl) this.longSoundUrl = options.longSoundUrl;
-        this.prepSounds(true);
-      }
-    }
+		/** Ustaw własne dźwięki powiadomień. */
+		setSounds(options) {
+			if (typeof options === 'object') {
+				if (options.shortSoundUrl) this.shortSoundUrl = options.shortSoundUrl;
+				if (options.longSoundUrl) this.longSoundUrl = options.longSoundUrl;
+				this.prepSounds(true);
+			}
+		}
 
-    /** Przygotowuje odtwarzacze dźwięków powiadomień. */
-    prepSounds(force = false) {
-      if (force || !this.sounds.short) {
-        this.sounds.short = new Audio(this.shortSoundUrl);
-      }
-      if (force || !this.sounds.longSoundUrl) {
-        this.sounds.long = new Audio(this.longSoundUrl);
-      }
-    }
+		/** Przygotowuje odtwarzacze dźwięków powiadomień. */
+		prepSounds(force = false) {
+			if (force || !this.sounds.short) {
+				this.sounds.short = new Audio(this.shortSoundUrl);
+			}
+			if (force || !this.sounds.longSoundUrl) {
+				this.sounds.long = new Audio(this.longSoundUrl);
+			}
+		}
 
-    /** Inicjuje obsługę start/stop na przycisku Live Update ("Odświeżaj na bieżąco"). */
-    initButtonHandler() {
-      const wrapper = document.querySelector('.mw-rcfilters-ui-liveUpdateButtonWidget');
-      if (!wrapper) return false;
-      const button = wrapper.querySelector('.oo-ui-buttonElement-button');
-      if (!button) return false;
+		/** Inicjuje obsługę start/stop na przycisku Live Update ("Odświeżaj na bieżąco"). */
+		initButtonHandler() {
+			const wrapper = document.querySelector('.mw-rcfilters-ui-liveUpdateButtonWidget');
+			if (!wrapper) return false;
+			const button = wrapper.querySelector('.oo-ui-buttonElement-button');
+			if (!button) return false;
 
-      wrapper.addEventListener('click', () => {
-        if (button.getAttribute('aria-pressed') === 'true') {
-          this.init();
-        } else {
-          this.stop();
-        }
-      });
-      console.log(this.logTag, 'Obsługa przycisku Live Update gotowa.');
-      return true;
-    }
+			wrapper.addEventListener('click', () => {
+				if (button.getAttribute('aria-pressed') === 'true') {
+					this.init();
+				} else {
+					this.stop();
+				}
+			});
+			console.log(this.logTag, 'Obsługa przycisku Live Update gotowa.');
+			return true;
+		}
 
-    /** Inicjuje obserwację zmian na stronie. */
-    init() {
-      const target = document.querySelector(".mw-rcfilters-ui-changesListWrapperWidget");
-      if (!target) {
-        console.warn(this.logTag, "Nie znaleziono kontenera z listą zmian.");
-        return;
-      }
+		/** Inicjuje obserwację zmian na stronie. */
+		init() {
+			const target = document.querySelector(".mw-rcfilters-ui-changesListWrapperWidget");
+			if (!target) {
+				console.warn(this.logTag, "Nie znaleziono kontenera z listą zmian.");
+				return;
+			}
 
-      this.lastTimestamp = this.getLatestTimestamp();
-      this.lastDateTime = new Date();
+			this.lastTimestamp = this.getLatestTimestamp();
+			this.lastDateTime = new Date();
 
-      this.observer = new MutationObserver(() => {
-        const current = this.getLatestTimestamp();
-        if (current > this.lastTimestamp) {
-          const now = new Date();
-          const diffMinutes = (now - this.lastDateTime) / 60000;
-          this.playSound(diffMinutes >= this.longSoundMinutes ? this.sounds.long : this.sounds.short);
-          this.lastDateTime = now;
-        }
-        this.lastTimestamp = current;
-      });
+			this.observer = new MutationObserver(() => {
+				const current = this.getLatestTimestamp();
+				if (current > this.lastTimestamp) {
+					const now = new Date();
+					const diffMinutes = (now - this.lastDateTime) / 60000;
+					this.playSound(diffMinutes >= this.longSoundMinutes ? this.sounds.long : this.sounds.short);
+					this.lastDateTime = now;
+				}
+				this.lastTimestamp = current;
+			});
 
-      this.observer.observe(target, {
-        childList: true,
-        subtree: true
-      });
-      console.log(this.logTag, "🔔 Monitor zmian aktywny.");
-    }
+			this.observer.observe(target, {
+				childList: true,
+				subtree: true
+			});
+			console.log(this.logTag, "🔔 Monitor zmian aktywny.");
+		}
 
-    /** Pobiera timestamp najnowszej zmiany. */
-    getLatestTimestamp() {
-      const el = document.querySelector(".mw-changeslist ul li");
-      return parseInt(el?.getAttribute("data-mw-ts") ?? -1);
-    }
+		/** Pobiera timestamp najnowszej zmiany. */
+		getLatestTimestamp() {
+			const el = document.querySelector(".mw-changeslist ul li");
+			return parseInt(el?.getAttribute("data-mw-ts") ?? -1);
+		}
 
-    /** Odtwarza dźwięk powiadomienia. */
-    playSound(sound) {
-      sound.play().catch(() => {});
-    }
+		/** Odtwarza dźwięk powiadomienia. */
+		playSound(sound) {
+			sound.play().catch(() => {});
+		}
 
-    /** Testuje odtwarzanie dźwięku. */
-    testSound(long = false) {
-      this.prepSounds();
-      this.playSound(long ? this.sounds.long : this.sounds.short);
-    }
+		/** Testuje odtwarzanie dźwięku. */
+		testSound(long = false) {
+			this.prepSounds();
+			this.playSound(long ? this.sounds.long : this.sounds.short);
+		}
 
-    /** Zatrzymuje obserwację zmian. */
-    stop() {
-      if (this.observer) {
-        this.observer.disconnect();
-        console.log(this.logTag, "⏹️ Monitor zmian zatrzymany.");
-      }
-    }
-  }
+		/** Zatrzymuje obserwację zmian. */
+		stop() {
+			if (this.observer) {
+				this.observer.disconnect();
+				console.log(this.logTag, "⏹️ Monitor zmian zatrzymany.");
+			}
+		}
+	}
 
-  return new RecentChangesAlert();
+	return new RecentChangesAlert();
 }
