@@ -1,28 +1,36 @@
-var rcAlert = recentChangesAlertFactory()
+//var rcAlert = recentChangesAlertFactory()
 // rcAlert.testSound(); // Testuje odtwarzanie dźwięku (zadziała dopiero po kliknięciu czegoś na stronie).
 // rcAlert.init(); // Inicjuje obserwację zmian na stronie.
 // rcAlert.stop(); // Kończy obserwację.
 
-window.addEventListener('load', () => {
-	const wrapper = document.querySelector('.mw-rcfilters-ui-liveUpdateButtonWidget');
-	if (!wrapper) return;
-	const button = wrapper.querySelector('.oo-ui-buttonElement-button');
-	if (!button) return;
+// Oczekiwanie pod TMonkey.
+// TODO: spr. czy bieżąca strona to Specjalna%3AOstatnie_zmiany wg mw.config
+// TODO: mw.hook? 
+if (location.search.includes('Specjalna%3AOstatnie_zmiany')) {
+  var rcAlert = recentChangesAlertFactory();
+	// spróbuj od razu
+	if (!rcAlert.initButtonHandler()) {
+		console.log(rcAlert.logTag, 'not yet');
+		// jeśli jeszcze nie ma, obserwuj DOM
+		const observer = new MutationObserver(() => {
+			if (rcAlert.initButtonHandler()) {
+				observer.disconnect();
+			} else {
+				console.log(rcAlert.logTag, 'not yet');
+			}
+		});
 
-	wrapper.addEventListener('click', () => {
-		if (button.getAttribute('aria-pressed') === 'true') {
-			rcAlert.init();
-		} else {
-			rcAlert.stop();
-		}
-	});
-});
+		observer.observe(document.body, { childList: true, subtree: true });
+	}
+}
 
 function recentChangesAlertFactory() {
 
   class RecentChangesAlert {
     /** Ścieżka do dźwięku powiadomienia. */
     soundUrl = "https://actions.google.com/sounds/v1/alarms/beep_short.ogg";
+
+    logTag = 'rcAlert';
 
     /** Odtwarzacz audio. */
     sound = null;
@@ -38,11 +46,29 @@ function recentChangesAlertFactory() {
       this.sound = new Audio(this.soundUrl);
     }
 
+    /** Inicjuje obsługę start/stop na przycisku Live Update ("Odświeżaj na bieżąco"). */
+    initButtonHandler() {
+      const wrapper = document.querySelector('.mw-rcfilters-ui-liveUpdateButtonWidget');
+      if (!wrapper) return false;
+      const button = wrapper.querySelector('.oo-ui-buttonElement-button');
+      if (!button) return false;
+
+      wrapper.addEventListener('click', () => {
+        if (button.getAttribute('aria-pressed') === 'true') {
+          this.init();
+        } else {
+          this.stop();
+        }
+      });
+      console.log(this.logTag, 'Obsługa przycisku Live Update gotowa.');
+      return true;
+    }
+
     /** Inicjuje obserwację zmian na stronie. */
     init() {
       const target = document.querySelector(".mw-rcfilters-ui-changesListWrapperWidget");
       if (!target) {
-        console.warn("Nie znaleziono kontenera z listą zmian.");
+        console.warn(this.logTag, "Nie znaleziono kontenera z listą zmian.");
         return;
       }
 
@@ -60,7 +86,7 @@ function recentChangesAlertFactory() {
         childList: true,
         subtree: true
       });
-      console.log("🔔 Monitor zmian aktywny.");
+      console.log(this.logTag, "🔔 Monitor zmian aktywny.");
     }
 
     /** Pobiera timestamp najnowszej zmiany. */
@@ -84,7 +110,7 @@ function recentChangesAlertFactory() {
     stop() {
       if (this.observer) {
         this.observer.disconnect();
-        console.log("⏹️ Monitor zmian zatrzymany.");
+        console.log(this.logTag, "⏹️ Monitor zmian zatrzymany.");
       }
     }
   }
