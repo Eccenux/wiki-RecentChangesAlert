@@ -1,14 +1,15 @@
-rcAlert = recentChangesAlertFactory()
+var rcAlert = recentChangesAlertFactory()
 // rcAlert.testSound(); // Testuje odtwarzanie dźwięku (zadziała dopiero po kliknięciu czegoś na stronie).
 // rcAlert.init(); // Inicjuje obserwację zmian na stronie.
 // rcAlert.stop(); // Kończy obserwację.
 
-$(()=>{
-	let button = document.querySelector('.mw-rcfilters-ui-liveUpdateButtonWidget .oo-ui-buttonElement-button');
-	if (!button) {
-		return;
-	}
-	$('.mw-rcfilters-ui-liveUpdateButtonWidget').on('click', ()=>{
+window.addEventListener('load', () => {
+	const wrapper = document.querySelector('.mw-rcfilters-ui-liveUpdateButtonWidget');
+	if (!wrapper) return;
+	const button = wrapper.querySelector('.oo-ui-buttonElement-button');
+	if (!button) return;
+
+	wrapper.addEventListener('click', () => {
 		if (button.getAttribute('aria-pressed') === 'true') {
 			rcAlert.init();
 		} else {
