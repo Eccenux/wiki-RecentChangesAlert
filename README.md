@@ -1,5 +1,7 @@
-RecentChangesAlert (RCA)
+RCA: RecentChangesAlert
 ==========================
+
+RC stands for RecentChanges special page (pol. OZ, Ostatnie Zmiany).
 
 ## DEV
 

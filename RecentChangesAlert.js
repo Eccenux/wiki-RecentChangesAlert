@@ -3,11 +3,16 @@
 // rcAlert.init(); // Inicjuje obserwację zmian na stronie.
 // rcAlert.stop(); // Kończy obserwację.
 
-// Oczekiwanie pod TMonkey.
-// TODO: spr. czy bieżąca strona to Specjalna%3AOstatnie_zmiany wg mw.config
-// TODO: mw.hook? 
-if (location.search.includes('Specjalna%3AOstatnie_zmiany')) {
-	var rcAlert = recentChangesAlertFactory();
+/*
+	RCA: RC alerts.
+
+	E.g. url:
+	https://pl.wikipedia.org/w/index.php?damaging=likelybad%3Bverylikelybad&hidebots=1&hidecategorization=1&hideWikibase=1&hidelog=1&hidenewuserlog=1&tagfilter=mw-reverted&inverttags=1&limit=100&days=0.25&title=Specjalna%3AOstatnie_zmiany&urlversion=2
+
+	Author: Maciej Nux.
+*/
+if (mw.config.get('wgCanonicalSpecialPageName') === 'Recentchanges') {
+	let rcAlert = recentChangesAlertFactory();
 	// spróbuj od razu
 	if (!rcAlert.initButtonHandler()) {
 		console.log(rcAlert.logTag, 'not yet');
