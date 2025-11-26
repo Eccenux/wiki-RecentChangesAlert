@@ -33,6 +33,7 @@ mw.hook('userjs.RecentChangesAlert.loaded').add(function (rcAlert) {
 		longSoundUrl: 'https://upload.wikimedia.org/wikipedia/commons/7/75/En-uk-yo-ho-ho.oga',
 	});
 });
+```
 
 Some other sounds You might want to use:
 - https://commons.wikimedia.org/wiki/File:Brush_Cuckoo_song_Nov2007.ogg
