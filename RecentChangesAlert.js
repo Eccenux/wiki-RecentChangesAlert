@@ -13,6 +13,9 @@
 */
 if (mw.config.get('wgCanonicalSpecialPageName') === 'Recentchanges') {
 	let rcAlert = recentChangesAlertFactory();
+
+	mw.hook('userjs.RecentChangesAlert.loaded').fire(rcAlert);
+
 	// spróbuj od razu
 	if (!rcAlert.initButtonHandler()) {
 		console.log(rcAlert.logTag, 'not yet');
@@ -31,31 +34,39 @@ if (mw.config.get('wgCanonicalSpecialPageName') === 'Recentchanges') {
 
 function recentChangesAlertFactory() {
 
+	/**
+	 * Main class of the gadget.
+	 */
 	class RecentChangesAlert {
-		/** Dźwięk powiadomienia (ustaw via setSounds). */
-		shortSoundUrl = "https://upload.wikimedia.org/wikipedia/commons/6/61/Beep_400ms.ogg";
-		// OR: https://commons.wikimedia.org/wiki/File:Emergency_Alert_System_Attention_Signal_20s.ogg
-		// OR: https://commons.wikimedia.org/wiki/Category:Emergency_Alert_System
-		/** Dźwięku powiadomienia po dłuższej przerwie między powiadomieniami (ustaw via setSounds). */
-		longSoundUrl = "https://upload.wikimedia.org/wikipedia/commons/1/14/Same.ogg";
-
-		/** Po ilu minutach nieaktywności odtworzyć długi dźwięk (teoretycznie może być ułamkiem). */
-		longSoundMinutes = 10;
-
-		logTag = '[rcAlert]';
-
-		/** Ostatni znany timestamp zmian. */
-		lastTimestamp = -1;
-
-		/** Obiekt MutationObserver. */
-		observer = null;
-
+		/**
+		 * Pre-init.
+		 */
 		constructor() {
+			/** Dźwięk powiadomienia (ustaw via setSounds). */
+			this.shortSoundUrl = "https://upload.wikimedia.org/wikipedia/commons/6/61/Beep_400ms.ogg";
+			// OR: https://commons.wikimedia.org/wiki/File:Emergency_Alert_System_Attention_Signal_20s.ogg
+			// OR: https://commons.wikimedia.org/wiki/Category:Emergency_Alert_System
+
+			/** Dźwięku powiadomienia po dłuższej przerwie między powiadomieniami (ustaw via setSounds). */
+			this.longSoundUrl = "https://upload.wikimedia.org/wikipedia/commons/1/14/Same.ogg";
+
+			/** Po ilu minutach nieaktywności odtworzyć długi dźwięk (teoretycznie może być ułamkiem). */
+			this.longSoundMinutes = 10;
+
+			this.logTag = '[rcAlert]';
+
+			/** Ostatni znany timestamp zmian. */
+			this.lastTimestamp = -1;
+
+			/** Obiekt MutationObserver. */
+			this.observer = null;
+
 			/** Odtwarzacze audio. */
 			this.sounds = {
 				short: null,
 				long: null,
-			}
+			};
+
 			this.prepSounds();
 		}
 
