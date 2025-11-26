@@ -1,7 +1,7 @@
 {
 	"type": "module",
 	"devDependencies": {
-		"eslint": "8.x",
+		"eslint": "9.x",
 		"wikiploy": "2.x"
 	},
 	"scripts": {
